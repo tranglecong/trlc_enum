@@ -1,3 +1,5 @@
+#pragma once
+
 #include "enum/detail.hpp"
 #include "enum/field.hpp" // IWYU pragma: export
 
@@ -19,5 +21,12 @@ struct DefaultEnumDef
 
 #define TRLC_ENUM(enumname, ...) \
     TRLC_ENUM_DETAIL(enumname, trlc::DefaultEnumDef, __VA_ARGS__)
+
+// Define a macro for starting the declaration
+#define TRLC_ENUM_DECLARE(enumname) \
+    enumname(
+
+// Define a macro for ending the declaration
+#define TRLC_ENUM_DECLARE_END() )
 
 } // namespace trlc
