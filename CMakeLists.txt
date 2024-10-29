@@ -7,13 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(TRLC_BUILD_TESTS "Enable building tests (ON or OFF)" ON)
 option(TRLC_GENERATE_RECURSIVE_MACRO "Enable recursive macro generation (ON or OFF)" ON)
 
-if(MSVC)
-    target_compile_options(trlc_enum INTERFACE
-        "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
-        "/permissive-" # Force standards compliance
-    )
-endif()
-
 add_library(enum INTERFACE)
 add_library(trlc::enum ALIAS enum)
 
@@ -22,6 +15,13 @@ target_include_directories(enum INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>
 )
+
+if(MSVC)
+    target_compile_options(enum INTERFACE
+        "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
+        "/permissive-" # Force standards compliance
+    )
+endif()
 
 if(TRLC_BUILD_EXAMPLES)
     add_subdirectory(example)
