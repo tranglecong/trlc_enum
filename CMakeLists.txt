@@ -9,15 +9,15 @@ option(TRLC_GENERATE_RECURSIVE_MACRO "Enable recursive macro generation (ON or O
 
 set(TRLC_GENERATE_RECURSIVE_MACRO ON)
 
+add_library(enum INTERFACE)
+add_library(trlc::enum ALIAS enum)
+
 if(MSVC)
-    target_compile_options(trlc_enum INTERFACE
+    target_compile_options(enum INTERFACE
         "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
         "/permissive-" # Force standards compliance
     )
 endif()
-
-add_library(enum INTERFACE)
-add_library(trlc::enum ALIAS enum)
 
 target_include_directories(enum INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
