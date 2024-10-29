@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(TRLC_BUILD_TESTS "Enable building tests (ON or OFF)" ON)
+option(TRLC_BUILD_EXAMPLES "Enable building tests (ON or OFF)" ON)
 option(TRLC_GENERATE_RECURSIVE_MACRO "Enable recursive macro generation (ON or OFF)" ON)
 
 add_library(enum INTERFACE)

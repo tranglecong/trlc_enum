@@ -87,6 +87,6 @@ int main()
     // Of course, we can also use iterators to print the properties.
     for (auto elem : Validate::iterator)
     {
-        std::cout << "tag: " << elem.tag() << ", value: " << elem.value() << ", name: " << elem.name() << ", desc: " << elem.desc() << std::endl;
+        std::cout << elem.dump() << std::endl;
     }
 }
