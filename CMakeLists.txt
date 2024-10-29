@@ -4,15 +4,15 @@ project(TRLC_ENUM VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_library(trlc_enum INTERFACE)
+add_library(trlc::enum ALIAS trlc_enum)
+
 if(MSVC)
-    add_compile_options(
+    target_compile_options(trlc_enum INTERFACE
         "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
         "/permissive-" # Force standards compliance
     )
 endif()
-
-add_library(trlc_enum INTERFACE)
-add_library(trlc::enum ALIAS trlc_enum)
 
 target_include_directories(trlc_enum INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
