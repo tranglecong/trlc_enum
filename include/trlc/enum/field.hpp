@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "common/constexpr_utils.hpp"
+#include "trlc/constexpr_utils.hpp"
 
 #include <array>
 #include <cstdint>
