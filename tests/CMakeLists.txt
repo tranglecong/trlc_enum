@@ -16,7 +16,7 @@ FetchContent_MakeAvailable(googletest)
 
 # Define the list of tests
 set(TEST_SOURCES
-    trlc_enum_tests.cpp
+    tests.cpp
 )
 
 # Loop through each test source and create the corresponding executable

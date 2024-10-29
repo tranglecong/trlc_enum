@@ -49,10 +49,19 @@ constexpr bool contains(std::string_view str, std::string_view substring)
 template<typename T, std::size_t N>
 constexpr bool has_unique_elements(const std::array<T, N>& arr)
 {
+    constexpr auto maximum{std::numeric_limits<T>::max()};
     for (std::size_t i = 0; i < N; ++i)
     {
+        if (arr[i] == maximum)
+        {
+            continue;
+        }
         for (std::size_t j = i + 1; j < N; ++j)
         {
+            if (arr[j] == maximum)
+            {
+                continue;
+            }
             if (arr[i] == arr[j])
             {
                 return false; // found a duplicate
@@ -78,22 +87,7 @@ constexpr bool isDigit(char c)
 }
 
 /**
- * @brief Converts a string view to a signed integer (std::int64_t).
- *
- * This function parses the input string view to produce a signed integer.
- * It handles optional leading signs ('-' for negative and '+' for positive).
- * If the input is invalid (contains non-numeric characters), it returns std::nullopt.
- *
- * @param str The string view containing the number to be converted.
- * @param pos Optional pointer to a size_t where the position after the parsed number will be stored.
- *            If provided, it can be used to determine where parsing stopped in the input string.
- * @return std::optional<std::int64_t> The parsed integer if successful, or std::nullopt if the input is invalid.
- *
- * @note The conversion is performed in a manner that allows evaluation at compile time
- *       if called with a constant string view.
- */
-/**
- * @brief Converts a string view to a signed integer (std::int64_t),
+ * @brief Converts a string view to a signed integer (int64_t),
  *        after removing all non-numeric characters from the beginning and end.
  *
  * This function parses the input string view to produce a signed integer.
@@ -104,12 +98,12 @@ constexpr bool isDigit(char c)
  * @param str The string view containing the number to be converted.
  * @param pos Optional pointer to a size_t where the position after the parsed number will be stored.
  *            If provided, it can be used to determine where parsing stopped in the input string.
- * @return std::optional<std::int64_t> The parsed integer if successful, or std::nullopt if the input is invalid.
+ * @return std::optional<int64_t> The parsed integer if successful, or std::nullopt if the input is invalid.
  *
  * @note The conversion is performed in a manner that allows evaluation at compile time
  *       if called with a constant string view.
  */
-constexpr std::optional<std::int64_t> stoi(std::string_view str, std::size_t* pos = nullptr)
+constexpr std::optional<int64_t> stoi(std::string_view str, std::size_t* pos = nullptr)
 {
     using namespace std::literals;
 
@@ -132,7 +126,7 @@ constexpr std::optional<std::int64_t> stoi(std::string_view str, std::size_t* po
         ++start; // Move past the sign
     }
 
-    std::int64_t result = 0;
+    int64_t result = 0;
 
     // Parse digits
     while (start < str.size() && isDigit(str[start]))
@@ -140,7 +134,7 @@ constexpr std::optional<std::int64_t> stoi(std::string_view str, std::size_t* po
         char c = str[start++];
 
         // Check for overflow before multiplying
-        if (result > (std::numeric_limits<std::int64_t>::max() - (c - '0')) / 10)
+        if (result > (std::numeric_limits<int64_t>::max() - (c - '0')) / 10)
         {
             return std::nullopt; // Overflow occurred
         }
