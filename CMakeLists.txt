@@ -10,7 +10,7 @@ option(TRLC_GENERATE_RECURSIVE_MACRO "Enable recursive macro generation (ON or O
 set(TRLC_GENERATE_RECURSIVE_MACRO ON)
 
 if(MSVC)
-    add_compile_options(
+    target_compile_options(trlc_enum INTERFACE
         "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
         "/permissive-" # Force standards compliance
     )
