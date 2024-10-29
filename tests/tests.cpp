@@ -10,22 +10,22 @@ TRLC_ENUM(Colors,
           YELLOW)
 
 TRLC_ENUM(Vehicles,
-          CAR = TRLC_FIELD(default = 1, desc = "A four-wheeled motor vehicle."),
-          TRUCK = TRLC_FIELD(default = 2, desc = "A motor vehicle designed to transport cargo."),
-          MOTORCYCLE = TRLC_FIELD(default = 3, desc = "A two-wheeled motor vehicle."),
-          BICYCLE = TRLC_FIELD(default = 4, desc = "A human-powered vehicle with two wheels."))
+          CAR = TRLC_FIELD(value = 1, desc = "A four-wheeled motor vehicle."),
+          TRUCK = TRLC_FIELD(value = 2, desc = "A motor vehicle designed to transport cargo."),
+          MOTORCYCLE = TRLC_FIELD(value = 3, desc = "A two-wheeled motor vehicle."),
+          BICYCLE = TRLC_FIELD(value = 4, desc = "A human-powered vehicle with two wheels."))
 
 TRLC_ENUM(StatusCodes,
-          SUCCESS = TRLC_FIELD(default = 0, desc = "Operation completed successfully."),
-          ERROR = TRLC_FIELD(default = 1, desc = "An error occurred."),
-          PENDING = TRLC_FIELD(default = 2, desc = "Operation pending."))
+          SUCCESS = TRLC_FIELD(value = 0, desc = "Operation completed successfully."),
+          ERROR = TRLC_FIELD(value = 1, desc = "An error occurred."),
+          PENDING = TRLC_FIELD(value = 2, desc = "Operation pending."))
 
 TRLC_ENUM(Validate,
           NON_FIELD,
-          WITH_DEFAULT = TRLC_FIELD(default = 5),
+          WITH_DEFAULT = TRLC_FIELD(value = 5),
           WITH_DESC = TRLC_FIELD(desc = "With description."),
-          FULL_FIELD = TRLC_FIELD(default = 100, desc = "Full feild."),
-          NEGATIVE_VALUE = TRLC_FIELD(default = -100, desc = "Default trlc enum can support negative value."),
+          FULL_FIELD = TRLC_FIELD(value = 100, desc = "Full feild."),
+          NEGATIVE_VALUE = TRLC_FIELD(value = -100, desc = "Default trlc enum can support negative value."),
           END)
 
 // Tests for Validate Enum

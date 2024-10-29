@@ -13,17 +13,17 @@ TRLC_ENUM(Rainbow,
           VIOLET)
 
 TRLC_ENUM(Cars,
-          SEDAN = TRLC_FIELD(default = 1, desc = "A comfortable car for daily commuting and family trips."),
-          SUV = TRLC_FIELD(default = 2, desc = "A versatile vehicle built for various terrains and passenger capacity."),
-          TRUCK = TRLC_FIELD(default = 3, desc = "A powerful vehicle designed for transporting heavy loads and equipment."),
-          JEEP = TRLC_FIELD(default = 4, desc = "A rugged vehicle ideal for off-road adventures and exploration."))
+          SEDAN = TRLC_FIELD(value = 1, desc = "A comfortable car for daily commuting and family trips."),
+          SUV = TRLC_FIELD(value = 2, desc = "A versatile vehicle built for various terrains and passenger capacity."),
+          TRUCK = TRLC_FIELD(value = 3, desc = "A powerful vehicle designed for transporting heavy loads and equipment."),
+          JEEP = TRLC_FIELD(value = 4, desc = "A rugged vehicle ideal for off-road adventures and exploration."))
 
 TRLC_ENUM(Validate,
           NON_FIELD,
-          WITH_DEFAULT = TRLC_FIELD(default = 5),
+          WITH_DEFAULT = TRLC_FIELD(value = 5),
           WITH_DESC = TRLC_FIELD(desc = "With description."),
-          FULL_FIELD = TRLC_FIELD(default = 100, desc = "Full feild."),
-          NEGATIVE_VALUE = TRLC_FIELD(default = -100, desc = "Default trlc enum can support negative value."),
+          FULL_FIELD = TRLC_FIELD(value = 100, desc = "Full feild."),
+          NEGATIVE_VALUE = TRLC_FIELD(value = -100, desc = "Default trlc enum can support negative value."),
           END)
 
 int main()

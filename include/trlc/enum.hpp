@@ -41,7 +41,7 @@ struct DefaultEnumDef
  * @param enumname The name of the enum being defined.
  * @param ... A variable number of enumeration values, which can include:
  *   - Normal enum values
- *   - TRLC_FIELD directives for default values and descriptions,
+ *   - TRLC_FIELD directives for value and descriptions,
  *     allowing for rich metadata associated with each enum value.
  *
  * @example
@@ -49,14 +49,14 @@ struct DefaultEnumDef
  *
  * TRLC_ENUM(Colors,
  *         RED,
- *         GREEN = TRLC_FIELD(default = 1),
+ *         GREEN = TRLC_FIELD(value = 1),
  *         BLUE = TRLC_FIELD(desc = "Sky color"),
- *         YELLOW = TRLC_FIELD(default = 2, desc = "Color of ripe bananas."))
+ *         YELLOW = TRLC_FIELD(value = 2, desc = "Color of ripe bananas."))
  * In this example, we define an enumeration called Colors with several values:
  * - RED: A regular enumerator with no associated metadata.
- * - GREEN: Assigned a default value of 1.
+ * - GREEN: Assigned a value of 1.
  * - BLUE: Has a description indicating it is the color of the sky.
- * - YELLOW: Assigned a default value of 2 and a description relating to ripe bananas.
+ * - YELLOW: Assigned a value of 2 and a description relating to ripe bananas.
  */
 #define TRLC_ENUM(enumname, ...) \
     TRLC_ENUM_DETAIL(enumname, trlc::DefaultEnumDef, __VA_ARGS__)

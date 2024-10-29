@@ -67,30 +67,47 @@ constexpr std::string_view before_equal(std::string_view str)
  *
  * Searches for the field and retrieves its associated numeric value if it exists.
  *
- * @param field The field name to search for.
  * @param input The input string_view containing field information.
  * @return An optional string_view representing the numeric value found or std::nullopt if not found.
  */
-constexpr std::optional<std::string_view> trlc_field_numberic(std::string_view field, std::string_view input)
+constexpr std::optional<std::string_view> trlc_field_value(std::string_view input)
 {
-    auto default_pos = input.find(field);
-    if (default_pos == std::string_view::npos)
+    constexpr std::string_view delim{"__delim__"};
+    constexpr std::string_view value_field{"value"};
+    constexpr std::string_view desc_field{"desc"};
+
+    auto delim_pos = input.find(delim);
+    auto desc_pos = input.find(desc_field);
+    std::size_t value_pos{input.find(value_field)};
+    if (desc_pos != std::string_view::npos && delim_pos == std::string_view::npos)
     {
         return std::nullopt;
     }
-    default_pos += field.size();
-    auto equal_pos = input.find('=', default_pos);
+    if (desc_pos != std::string_view::npos && delim_pos != std::string_view::npos)
+    {
+        if (desc_pos < delim_pos)
+        {
+            value_pos = input.find(value_field, delim_pos);
+        }
+    }
+
+    if (value_pos == std::string_view::npos)
+    {
+        return std::nullopt;
+    }
+    value_pos += value_field.size();
+    auto equal_pos = input.find('=', value_pos);
     if (equal_pos == std::string_view::npos)
     {
         return std::nullopt;
     }
     equal_pos++;
 
-    // Find the end of the default value
-    auto end_of_default = input.find('_', default_pos);
+    // Find the end of the value
+    auto end_of_default = input.find(delim, value_pos);
     if (end_of_default == std::string_view::npos)
     {
-        end_of_default = input.find('\"', default_pos);
+        end_of_default = input.find('\"', value_pos);
     }
     if (end_of_default == std::string_view::npos)
     {
@@ -100,16 +117,16 @@ constexpr std::optional<std::string_view> trlc_field_numberic(std::string_view f
 }
 
 /**
- * @brief Extracts a string value from a specified field in the input string.
+ * @brief Extracts a desc string from a specified field in the input string.
  *
- * Similar to trlc_field_numberic, but designed to extract string values and handle escaping.
+ * Similar to trlc_field_value, but designed to extract string values and handle escaping.
  *
- * @param field The field name to search for.
  * @param input The input string_view containing field information.
  * @return An optional string_view representing the string value found or std::nullopt if not found.
  */
-constexpr std::optional<std::string_view> trlc_field_string(std::string_view field, std::string_view input)
+constexpr std::optional<std::string_view> trlc_field_desc(std::string_view input)
 {
+    constexpr std::string_view field{"desc"};
     auto default_pos = input.find(field);
     if (default_pos == std::string_view::npos)
     {
@@ -198,7 +215,7 @@ constexpr auto array_values(const char* const (&args)[N])
     {
         if (trlc::constexpr_utils::contains(args[index], "NormalizeHelper"))
         {
-            const auto default_value_str{trlc::enum_feild::trlc_field_numberic("default", args[index])};
+            const auto default_value_str{trlc::enum_feild::trlc_field_value(args[index])};
             if (!default_value_str)
             {
                 continue;
@@ -207,13 +224,13 @@ constexpr auto array_values(const char* const (&args)[N])
             const auto raw_default_value{trlc::constexpr_utils::stoi(default_value_str.value())};
             if (!raw_default_value)
             {
-                throw std::invalid_argument("Invalid default value!");
+                throw std::invalid_argument("Invalid value!");
             }
 
             const auto default_value{raw_default_value.value()};
             if (default_value < minimum_value || default_value > maximum_value)
             {
-                throw std::invalid_argument("Default value overflow with current enum value type!");
+                throw std::invalid_argument("Value overflow with current enum value type!");
             }
 
             indices[index] = default_value;
@@ -297,7 +314,7 @@ constexpr auto create_array_description(const char* const (&args)[N])
     {
         if (trlc::constexpr_utils::contains(args[index], "NormalizeHelper"))
         {
-            const auto description_str{trlc::enum_feild::trlc_field_string("desc", args[index])};
+            const auto description_str{trlc::enum_feild::trlc_field_desc(args[index])};
             if (description_str)
             {
                 descriptions[index] = description_str.value();

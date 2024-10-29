@@ -35,4 +35,5 @@
 .cache/
 build/
 .clang-format
+include/trlc/macro/
 
