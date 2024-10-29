@@ -4,7 +4,9 @@
 #include "trlc/constexpr_utils.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
@@ -37,10 +39,10 @@ struct NormalizeHelper
      *
      * Helper for create enum by TRLC_ENUM for FIELD case.
      *
-     * @param value An integer value.
+     * @param value An size_t value.
      * @return The index of tracking enum array.
      */
-    constexpr int64_t operator*(int64_t value) const
+    constexpr size_t operator*(size_t value) const
     {
         return value;
     }
@@ -134,13 +136,38 @@ constexpr std::optional<std::string_view> trlc_field_string(std::string_view fie
 
     std::string_view result{input.substr(equal_pos, end_of_default - equal_pos)};
     size_t start = result.find_first_not_of("\\\"");
-    size_t end = result.find_last_not_of("\\\"");
+    size_t end = result.find_first_of("\\\"", start + 3);
 
     if (start == std::string_view::npos)
     {
         return std::string_view{};
     }
-    return std::string_view(result.substr(start + 3, end - start - 2));
+    return std::string_view(result.substr(start + 3, end - start - 3));
+}
+
+/**
+ * @brief Searches for a given value in a constexpr std::array.
+ *
+ * This function performs a linear search on the provided `std::array`
+ * and returns true if the value is found, or false otherwise.
+ *
+ * @tparam T The type of the array elements.
+ * @tparam N The size of the array.
+ * @param arr The `std::array` to search.
+ * @param value The value to find within the array.
+ * @return constexpr bool True if the value is found, false otherwise.
+ */
+template<typename T, std::size_t N>
+constexpr bool find_value(const std::array<T, N>& arr, const T value)
+{
+    for (std::size_t i = 0; i < N; ++i)
+    {
+        if (arr[i] == value)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -149,17 +176,24 @@ constexpr std::optional<std::string_view> trlc_field_string(std::string_view fie
  * This function looks for occurrences of "NormalizeHelper" in the provided arguments,
  * fetching their default values and returning the constructed indices.
  *
+ * @tparam TrLc enum Holder class
  * @tparam N The number of elements in the args array.
  * @param args An array of const character pointers.
- * @return An array of int64_t representing the constructed indices.
+ * @return An array of Holder::value_type representing the constructed indices.
  * @throws std::invalid_argument If any default values are invalid.
  */
-template<size_t N>
+template<class Holder, size_t N>
 constexpr auto array_values(const char* const (&args)[N])
 {
-    size_t specific_array_pos{0};
-    std::array<std::int64_t, N> specific_indexs{};
-    std::array<std::int64_t, N> specific_values{};
+    std::array<typename Holder::value_type, N> indices{};
+    std::array<typename Holder::value_type, N> specific_values{};
+    constexpr auto maximum_value{std::numeric_limits<typename Holder::value_type>::max()};
+    constexpr auto minimum_value{std::numeric_limits<typename Holder::value_type>::min()};
+    for (size_t index{0}; index < N; ++index)
+    {
+        indices[index] = maximum_value;
+        specific_values[index] = maximum_value;
+    }
     for (size_t index{0}; index < N; ++index)
     {
         if (trlc::constexpr_utils::contains(args[index], "NormalizeHelper"))
@@ -167,44 +201,49 @@ constexpr auto array_values(const char* const (&args)[N])
             const auto default_value_str{trlc::enum_feild::trlc_field_numberic("default", args[index])};
             if (!default_value_str)
             {
-                throw std::invalid_argument("Invalid default value string!");
+                continue;
             }
 
-            const auto default_value{trlc::constexpr_utils::stoi(default_value_str.value())};
-            if (!default_value)
+            const auto raw_default_value{trlc::constexpr_utils::stoi(default_value_str.value())};
+            if (!raw_default_value)
             {
                 throw std::invalid_argument("Invalid default value!");
             }
-            specific_indexs[specific_array_pos] = index;
-            specific_values[specific_array_pos] = default_value.value();
-            specific_array_pos++;
+
+            const auto default_value{raw_default_value.value()};
+            if (default_value < minimum_value || default_value > maximum_value)
+            {
+                throw std::invalid_argument("Default value overflow with current enum value type!");
+            }
+
+            indices[index] = default_value;
         }
     }
 
-    if (trlc::constexpr_utils::has_unique_elements(specific_values))
+    if (!trlc::constexpr_utils::has_unique_elements(specific_values))
     {
         throw std::invalid_argument("Value must be unique!");
     }
 
-    std::array<std::int64_t, N> indices{};
-    // Fill default indexing to indices
+    typename Holder::value_type current{0};
+
     for (size_t index{0}; index < N; ++index)
     {
-        indices[index] = index;
-    }
-    // Swap index for specific value cases
-    for (size_t index{0}; index < specific_array_pos; ++index)
-    {
-        if (specific_values[index] > N || specific_values[index] < 0)
+        if (indices[index] == maximum_value)
         {
-            indices[specific_indexs[index]] = specific_values[index];
-            continue;
+            for (size_t loop{0}; loop < N; ++loop)
+            {
+                if (find_value(specific_values, current))
+                {
+                    current++;
+                    continue;
+                }
+                break;
+            }
+            indices[index] = current;
+            current++;
         }
-        std::int64_t back_up{indices[specific_indexs[index]]};
-        indices[specific_indexs[index]] = specific_values[index];
-        indices[specific_values[index]] = back_up;
     }
-
     return indices;
 }
 
@@ -258,7 +297,7 @@ constexpr auto create_array_description(const char* const (&args)[N])
     {
         if (trlc::constexpr_utils::contains(args[index], "NormalizeHelper"))
         {
-            const auto description_str{trlc::enum_feild::trlc_field_string("description", args[index])};
+            const auto description_str{trlc::enum_feild::trlc_field_string("desc", args[index])};
             if (description_str)
             {
                 descriptions[index] = description_str.value();
@@ -284,20 +323,20 @@ constexpr auto create_array_description(const char* const (&args)[N])
  * @return std::size_t The index of the next minimum value greater than `min`, or `N` if none is found.
  */
 template<typename T, std::size_t N>
-constexpr auto index_of_next_min(const std::array<T, N>& array, T min)
+constexpr auto index_of_next_min(const std::array<T, N>& array, int64_t min)
 {
     std::size_t next_min_index{N};
-    T next_min{std::numeric_limits<T>::max()};
+    int64_t next_min{std::numeric_limits<T>::max()};
 
     for (std::size_t index{0}; index < array.size(); ++index)
     {
-        if (min >= array[index])
+        if (min >= static_cast<int64_t>(array[index]))
         {
             continue;
         }
-        if (array[index] < next_min)
+        if (static_cast<int64_t>(array[index]) < next_min)
         {
-            next_min = array[index];
+            next_min = static_cast<int64_t>(array[index]);
             next_min_index = index;
         }
     }
@@ -324,13 +363,12 @@ template<class Holder>
 constexpr auto create_array_enum()
 {
     std::array<typename Holder::enum_type, Holder::m_size> result{};
-    std::array<size_t, Holder::m_size> sorted_index{};
-    auto min_value{std::numeric_limits<typename Holder::value_type>::min()};
+    std::int64_t min_value{std::numeric_limits<std::int64_t>::min()};
 
     for (size_t index{0}; index < Holder::m_size; ++index)
     {
         auto next_min_index{index_of_next_min(Holder::m_values, min_value)};
-        min_value = Holder::m_values[next_min_index];
+        min_value = static_cast<int64_t>(Holder::m_values[next_min_index]);
         result[index] = typename Holder::enum_type{Holder::m_values[next_min_index],
                                                    Holder::m_names[next_min_index],
                                                    Holder::m_descs[next_min_index]};

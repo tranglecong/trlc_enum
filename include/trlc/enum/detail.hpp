@@ -1,11 +1,11 @@
+#pragma once
+
 #include <algorithm>
-#include <array>
-#include <atomic>
 #include <cstddef>
 #include <iostream>
 #include <optional>
-#include <string_view>
 #include <string>
+#include <string_view>
 
 namespace trlc
 {
@@ -13,7 +13,7 @@ namespace trlc
 // clang-format off
 #define TRLC_ENUM_NORMALIZE_HELPER() trlc::enum_feild::NormalizeHelper()
 
-#define TRLC_FIELD(...) TRLC_ENUM_NORMALIZE_HELPER() (TRLC_APPEND(TRLC_STRINGIFY, __delim__, __VA_ARGS__)) * int64_t
+#define TRLC_FIELD(...) TRLC_ENUM_NORMALIZE_HELPER() (TRLC_APPEND(TRLC_STRINGIFY, __delim__, __VA_ARGS__)) * size_t
 
 #define TRLC_ENUM_DECLARE_HELPER(varname, index) static constexpr enum_type varname{index - 1}
 
@@ -26,7 +26,7 @@ namespace trlc
         using name_type = enum_def::enum_type::name_type;                                                                                                     \
         using iterator_type = enum_def::iterator;                                                                                                             \
         inline static constexpr std::string_view m_tag{#enumname};                                                                                            \
-        inline static constexpr auto m_values = trlc::enum_feild::array_values({TRLC_EXPAND(TRLC_STRINGIFY, __VA_ARGS__)});                                   \
+        inline static constexpr auto m_values = trlc::enum_feild::array_values<enumname>({TRLC_EXPAND(TRLC_STRINGIFY, __VA_ARGS__)});                         \
         inline static constexpr auto m_names = trlc::enum_feild::create_array_name({TRLC_EXPAND(TRLC_STRINGIFY, __VA_ARGS__)});                               \
         inline static constexpr auto m_descs = trlc::enum_feild::create_array_description({TRLC_EXPAND(TRLC_STRINGIFY, __VA_ARGS__)});                        \
         inline static constexpr auto m_size = m_values.size();                                                                                                \
@@ -64,6 +64,7 @@ namespace trlc
             return result;                                                                                                                                    \
         }                                                                                                                                                     \
     };
+
 // clang-format on
 
 /**
@@ -412,10 +413,10 @@ struct CaseSensitiveStringSearchPolicy
     static constexpr std::optional<size_t> search(const typename Holder::name_type& name)
     {
         std::optional<size_t> found_index{};
-        for (size_t index{0}; index < Holder::m_names.size(); ++index)
+        for (size_t index{0}; index < Holder::m_array.size(); ++index)
         {
 
-            if (Holder::m_names[index] == name)
+            if (Holder::m_array[index].name() == name)
             {
                 found_index = index;
                 break;
@@ -460,10 +461,10 @@ struct CaseInsensitiveStringSearchPolicy
     static constexpr std::optional<size_t> search(const typename Holder::name_type& name)
     {
         std::optional<size_t> found_index{};
-        for (size_t index{0}; index < Holder::m_names.size(); ++index)
+        for (size_t index{0}; index < Holder::m_array.size(); ++index)
         {
 
-            if (name.size() == Holder::m_names[index].size() && std::equal(Holder::m_names[index].begin(), Holder::m_names[index].end(), name.begin(), caseInsensitiveEqual))
+            if (name.size() == Holder::m_array[index].name().size() && std::equal(Holder::m_array[index].name().begin(), Holder::m_array[index].name().end(), name.begin(), caseInsensitiveEqual))
             {
                 found_index = index;
                 break;

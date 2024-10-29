@@ -1,7 +1,11 @@
+#pragma once
+
 #include "enum/detail.hpp"
 #include "enum/field.hpp" // IWYU pragma: export
 
 #include "macro.hpp" // IWYU pragma: export
+
+#include <cstdint>
 
 namespace trlc
 {

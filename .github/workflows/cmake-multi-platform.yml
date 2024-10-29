@@ -63,6 +63,8 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -DTRLC_BUILD_TESTS=ON
+        -DTRLC_BUILD_EXAMPLES=ON
+        -DTRLC_GENERATE_RECURSIVE_MACRO=ON
         -S ${{ github.workspace }}
 
     - name: Build
