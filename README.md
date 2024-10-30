@@ -99,7 +99,7 @@ std::cout << "Compile time holder check passed." << std::endl;
 
 _The tag property of the enum or enum element is the name of that enum._
 
-> **Information:** Each enum or enum element has a dump() function that operates at runtime. 
+> **Information:** Each enum or enum element has a dump() function that operates at runtime.
 
 ```c++
 std::cout << "[1] Enum Rainbow :";
@@ -117,6 +117,27 @@ for (auto elem : Validate::iterator)
 ```
 
 _It returns a JSON string of the properties associated with the enum element and a list of elements for the enum._
+
+> **Customization:** Currently, `TRLC_ENUM` uses `trlc:DefaultEnumDef<>`, but you can also define an enum definition and use it with `TRLC_ENUM_DETAIL`.
+
+```c++
+template<class Holder>
+struct CustomEnumDefine
+{
+    using holder = Holder;
+    using value_type = uint32_t;
+    using value_search_policy = trlc::policy::BinarySearchPolicy;
+    using name_search_policy = trlc::policy::CaseInsensitiveStringSearchPolicy;
+    using unknown_policy = trlc::policy::UnknownPolicy;
+    using enum_type = trlc::Enum<value_type, holder>;
+    using iterator = trlc::EnumIterator<holder>;
+};
+
+TRLC_ENUM_DETAIL(Colors, CustomEnumDefine,
+    RED,
+    BLUE,
+    GREEN)
+```
 
 The output of running all the blocks above will be as follows:
 
@@ -149,3 +170,59 @@ Compile time holder check passed.
 {"tag": "Validate, "value": 5, "name": "WITH_DEFAULT", "desc": ""}
 {"tag": "Validate, "value": 100, "name": "FULL_FIELD", "desc": "Full feild."}
 ```
+
+You can see the full example at [[example](https://github.com/tranglecong/trlc_enum/blob/master/example/example.cpp)]
+
+## Installation
+
+### Prerequisites
+
+To use this library, you need:
+
+- **CMake** 3.10 or higher
+- **GCC**, **Clang** or **MSVC** compiler with C++17 support
+- **GoogleTest** (automatically fetched by CMake for testing)
+
+### Intergration
+
+> **Subdirectory:** _This library can be used as [CMake] subdirectory_
+
+1. Fetch it, e.g. using [git submodules] `git submodule add https://github.com/tranglecong/trlc_enum` and `git submodule update --init --recursive`.
+
+2. Call `add_subdirectory(ext/trlc_enum)` or whatever your local path is to make it available in [CMake].
+
+3. Simply call `target_link_libraries(your_target PUBLIC [trlc::enum, trlc_enum])` to link this library and setups the include search path and compilation options.
+
+> **Install:** _You can also install trlc_enum library_
+
+1. Run CMake configure inside the library sources. If you do not want to build the UT and example set `-DTRLC_BUILD_TESTS=OFF` , `-DTRLC_BUILD_EXAMPLES=OFF`
+
+    ```bash
+    cmake -DCMAKE_BUILD_TYPE=Debug -DTRLC_BUILD_TESTS=ON -DTRLC_BUILD_EXAMPLES=ON -DTRLC_GENERATE_RECURSIVE_MACRO=ON -S . -B ./build
+    ```
+
+The Enum library uses a recursive macro. The header macros will be generated when running the CMake configure through the execute Python script [[macro_expansion_generator.py](https://github.com/tranglecong/trlc_enum/blob/master/macro_expansion_generator.py)]. The default value of `TRLC_MACRO_RECURSIVE_MAX_NUM` is 64. If you want to change it, you can modify the CMake file or set `-DTRLC_MACRO_RECURSIVE_MAX_NUM=xxx`. With xxx being the number you desire.
+
+1. Build and install the library under `${CMAKE_INSTALL_PREFIX}`. You may be required to have sudo privileges to install in the `/usr/*`.
+
+    ```bash
+    cmake --build ./build -j8 -- install
+    ```
+
+    [Optional] if you want to run UT.
+
+    ```bash
+    ctest --test-dir ./build
+    ```
+
+2. To use an installed library.
+
+    ```cmake
+    find_package(trlc REQUIRED)
+    target_link_libraries(your_target PUBLIC trlc::enum)
+    ```
+
+## Contributing
+
+Welcome contributions from everyone! If you’d like to help improve this project.
+Thank you for considering contributing to this project!
