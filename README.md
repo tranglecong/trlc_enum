@@ -4,7 +4,9 @@ A powerful C++ enum library that enhances traditional enums by allowing the use 
 
 ## Features
 
-> **Declaration:** We can declare enums in a traditional way, with fields or mix.
+### Declaration
+
+We can declare enums in a traditional way, with fields or mix.
 
 ```c++
 #include <trlc/enum.hpp>
@@ -37,7 +39,9 @@ TRLC_ENUM(Validate,
           END)
 ```
 
-> **Attributes:** We can use the attributes `name`, `value`, `desc` and `tag` of trlc enum
+### Attributes
+
+We can use the attributes `name`, `value`, `desc` and `tag` of trlc enum
 
 ```c++
 static_assert(Rainbow::ORANCE.tag() == "Rainbow");
@@ -53,7 +57,9 @@ static_assert(Validate::NEGATIVE_VALUE.desc() == "Default trlc enum can support 
 std::cout << "Compile time attributes check passed." << std::endl;
 ```
 
-> **Conversion:** We can use the fromValue and fromString functions to look up enum elements.
+### Conversion
+
+We can use the fromValue and fromString functions to look up enum elements.
 
 ```c++
 constexpr auto rainbow_green_optional{Rainbow::fromValue(3)};
@@ -67,9 +73,11 @@ static_assert(cars_suv_optional.value() == Cars::SUV);
 std::cout << "Compile time fromValue(), fromString() check passed." << std::endl;
 ```
 
-_The return value will be constexpr `std::optional<enumtype>`._
+> The return value will be constexpr `std::optional<enumtype>`.
 
-> **Iterators:** We can also use iterators for enum classes. And it also supports compile-time!
+### Iterators
+
+We can also use iterators for enum classes. And it also supports compile-time!
 
 ```c++
 constexpr auto check_size_of_rainbow = [&]() -> size_t
@@ -86,7 +94,9 @@ static_assert(check_size_of_rainbow() == Rainbow::size());
 std::cout << "Compile time iterators check passed." << std::endl;
 ```
 
-> **Traceability:** From an enum element, we can also retrieve its holder.
+### Traceability
+
+From an enum element, we can also retrieve its holder.
 
 ```c++
 constexpr auto suv{cars_suv_optional.value()};
@@ -97,9 +107,11 @@ static_assert(suv.holder().TRUCK == Cars::TRUCK);
 std::cout << "Compile time holder check passed." << std::endl;
 ```
 
-_The tag property of the enum or enum element is the name of that enum._
+> The tag property of the enum or enum element is the name of that enum.
 
-> **Information:** Each enum or enum element has a dump() function that operates at runtime.
+### Information
+
+Each enum or enum element has a dump() function that operates at runtime.
 
 ```c++
 std::cout << "[1] Enum Rainbow :";
@@ -116,9 +128,11 @@ for (auto elem : Validate::iterator)
 }
 ```
 
-_It returns a JSON string of the properties associated with the enum element and a list of elements for the enum._
+> It returns a JSON string of the properties associated with the enum element and a list of elements for the enum.
 
-> **Customization:** Currently, `TRLC_ENUM` uses `trlc:DefaultEnumDef<>`, but you can also define an enum definition and use it with `TRLC_ENUM_DETAIL`.
+### Customization
+
+Currently, `TRLC_ENUM` uses `trlc:DefaultEnumDef<>`, but you can also define an enum definition and use it with `TRLC_ENUM_DETAIL`.
 
 ```c++
 template<class Holder>
@@ -185,7 +199,9 @@ To use this library, you need:
 
 ### Intergration
 
-> **Subdirectory:** _This library can be used as [CMake] subdirectory_
+#### Subdirectory
+
+This library can be used as CMake subdirectory.
 
 1. Fetch it, e.g. using [git submodules] `git submodule add https://github.com/tranglecong/trlc_enum` and `git submodule update --init --recursive`.
 
@@ -193,7 +209,9 @@ To use this library, you need:
 
 3. Simply call `target_link_libraries(your_target PUBLIC [trlc::enum, trlc_enum])` to link this library and setups the include search path and compilation options.
 
-> **Install:** _You can also install trlc_enum library_
+#### Install
+
+You can also install trlc_enum library
 
 1. Run CMake configure inside the library sources. If you do not want to build the UT and example set `-DTRLC_BUILD_TESTS=OFF` , `-DTRLC_BUILD_EXAMPLES=OFF`
 
@@ -201,7 +219,7 @@ To use this library, you need:
     cmake -DCMAKE_BUILD_TYPE=Debug -DTRLC_BUILD_TESTS=ON -DTRLC_BUILD_EXAMPLES=ON -DTRLC_GENERATE_RECURSIVE_MACRO=ON -S . -B ./build
     ```
 
-The Enum library uses a recursive macro. The header macros will be generated when running the CMake configure through the execute Python script [[macro_expansion_generator.py](https://github.com/tranglecong/trlc_enum/blob/master/macro_expansion_generator.py)]. The default value of `TRLC_MACRO_RECURSIVE_MAX_NUM` is 64. If you want to change it, you can modify the CMake file or set `-DTRLC_MACRO_RECURSIVE_MAX_NUM=xxx`. With xxx being the number you desire.
+> The Enum library uses a recursive macro. The header macros will be generated when running the CMake configure through the execute Python script [[macro_expansion_generator.py](https://github.com/tranglecong/trlc_enum/blob/master/macro_expansion_generator.py)]. The default value of `TRLC_MACRO_RECURSIVE_MAX_NUM` is 64. If you want to change it, you can modify the CMake file or set `-DTRLC_MACRO_RECURSIVE_MAX_NUM=xxx`. With xxx being the number you desire.
 
 1. Build and install the library under `${CMAKE_INSTALL_PREFIX}`. You may be required to have sudo privileges to install in the `/usr/*`.
 
