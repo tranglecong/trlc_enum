@@ -17,6 +17,8 @@ target_include_directories(enum INTERFACE
     $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+target_compile_features(enum INTERFACE cxx_std_17)
+
 if(MSVC)
     target_compile_options(enum INTERFACE
         "/Zc:preprocessor" # Use standard-compliant preprocessor behavior
@@ -65,30 +67,52 @@ endif()
 
 set(TRLC_ENUM_HEADER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
+if(UNIX OR VXWORKS)
+    include(GNUInstallDirs)
+
+    set(TRLC_ENUM_INCLUDE_INSTALL_DIR "${CMAKE_INSTALL_INCLUDEDIR}")
+    set(TRLC_ENUM_RUNTIME_INSTALL_DIR "${CMAKE_INSTALL_BINDIR}")
+    set(TRLC_ENUM_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+    set(TRLC_ENUM_ARCHIVE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+    set(TRLC_ENUM_CMAKE_CONFIG_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/trlc")
+elseif(WIN32)
+    set(TRLC_ENUM_INCLUDE_INSTALL_DIR "include")
+    set(TRLC_ENUM_RUNTIME_INSTALL_DIR "bin")
+    set(TRLC_ENUM_LIBRARY_INSTALL_DIR "bin")
+    set(TRLC_ENUM_ARCHIVE_INSTALL_DIR "lib")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    set(TRLC_ENUM_CMAKE_CONFIG_INSTALL_DIR "share/cmake/trlc")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+else()
+    message(FATAL_ERROR "Could not set install folders for this platform!")
+endif()
+
 include(CMakePackageConfigHelpers)
 
-install(TARGETS enum
-    EXPORT enumTargets
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/trlc
-    INCLUDES DESTINATION ${CMAKE_INSTALL_PREFIX}/include
+install(TARGETS enum EXPORT enumTargets
+    RUNTIME DESTINATION ${TRLC_ENUM_RUNTIME_INSTALL_DIR}
+    LIBRARY DESTINATION ${TRLC_ENUM_LIBRARY_INSTALL_DIR}
+    ARCHIVE DESTINATION ${TRLC_ENUM_ARCHIVE_INSTALL_DIR}
+    INCLUDES DESTINATION ${TRLC_ENUM_INCLUDE_INSTALL_DIR}
 )
-install(DIRECTORY "${TRLC_ENUM_HEADER_PATH}" # source directory
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include # target directory
-    FILES_MATCHING # install only matched files
-    PATTERN "*.hpp" # select header files
+
+install(DIRECTORY "${TRLC_ENUM_HEADER_PATH}"
+    DESTINATION ${TRLC_ENUM_INCLUDE_INSTALL_DIR}
+    FILES_MATCHING
+    PATTERN "*.hpp"
 )
 
 configure_package_config_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/trlcConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/trlcConfig.cmake
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/trlc"
+    INSTALL_DESTINATION ${TRLC_ENUM_CMAKE_CONFIG_INSTALL_DIR}
 )
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/trlcConfig.cmake
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/trlc"
+    DESTINATION ${TRLC_ENUM_CMAKE_CONFIG_INSTALL_DIR}
 )
 
 install(EXPORT enumTargets
-  NAMESPACE trlc::
-  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/trlc
+    NAMESPACE trlc::
+    DESTINATION ${TRLC_ENUM_CMAKE_CONFIG_INSTALL_DIR}
 )
