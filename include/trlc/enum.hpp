@@ -9,7 +9,7 @@
 
 namespace trlc
 {
-template<class Holder>
+
 
 /**
  * @brief A structure that defines the default behavior and policies for enum handling.
@@ -22,6 +22,7 @@ template<class Holder>
  * TRLC_ENUM_DETAIL macro to modify the behavior of enum management
  * in accordance with specific needs.
  */
+template<class Holder>
 struct DefaultEnumDef
 {
     using holder = Holder;

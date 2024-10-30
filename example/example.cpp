@@ -28,7 +28,8 @@ TRLC_ENUM(Validate,
 
 int main()
 {
-    // We can use the attributes name, value, and desc of trlc enum.
+    // We can use the attributes name, value, desc and tag of trlc enum.
+    static_assert(Rainbow::ORANCE.tag() == "Rainbow");
     static_assert(Rainbow::RED.value() == 0);
     static_assert(Rainbow::GREEN.name() == "GREEN");
     static_assert(Cars::JEEP.value() == 4);
