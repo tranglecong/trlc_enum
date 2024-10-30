@@ -1,5 +1,9 @@
 # TRLC Enum
 
+![GCC](https://github.com/tranglecong/trlc_enum/actions/workflows/GCC.yml/badge.svg)
+![Clang](https://github.com/tranglecong/trlc_enum/actions/workflows/Clang.yml/badge.svg)
+![MSVC](https://github.com/tranglecong/trlc_enum/actions/workflows/MSVC.yml/badge.svg)
+
 A powerful C++ enum library that enhances traditional enums by allowing the use of attributes and providing support for compile-time operations.
 
 ## Features
