@@ -230,7 +230,8 @@ You can also install trlc_enum library
     [Optional] if you want to run UT.
 
     ```bash
-    ctest --test-dir ./build
+    cd ./build
+    ctest -V
     ```
 
 2. To use an installed library.
