@@ -10,7 +10,9 @@ We can declare enums in a traditional way, with fields or mix.
 
 ```c++
 #include <trlc/enum.hpp>
+```
 
+```c++
 TRLC_ENUM(Rainbow,
           RED,
           ORANCE,
@@ -38,6 +40,8 @@ TRLC_ENUM(Validate,
           NEGATIVE_VALUE = TRLC_FIELD(value = -100, desc = "Default trlc enum can support negative value."),
           END)
 ```
+
+> This Enum is essentially a struct, so we can declare it within the scope where the struct can be declared.
 
 ### Attributes
 
