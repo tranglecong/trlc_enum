@@ -138,6 +138,35 @@ for (auto elem : Validate::iterator)
 
 > It returns a JSON string of the properties associated with the enum element and a list of elements for the enum.
 
+### Regular type
+
+We can use `Enum::enum_type` just like a regular type.
+
+```c++
+Cars::enum_type a_car{Cars::SUV};
+auto functor = [](const Cars::enum_type& car) -> void
+{
+    switch (car)
+    {
+    case Cars::SEDAN:
+        std::cout << "SEDAN :" << car.dump() << std::endl;
+        break;
+    case Cars::SUV:
+        std::cout << "SUV :" << car.dump() << std::endl;
+        break;
+    case Cars::TRUCK:
+        std::cout << "TRUCK :" << car.dump() << std::endl;
+        break;
+    case Cars::JEEP:
+        std::cout << "JEEP :" << car.dump() << std::endl;
+        break;
+    }
+};
+functor(a_car);
+a_car = Cars::TRUCK;
+functor(a_car);
+```
+
 ### Customization
 
 Currently, `TRLC_ENUM` uses `trlc:DefaultEnumDef<>`, but you can also define an enum definition and use it with `TRLC_ENUM_DETAIL`.
@@ -164,7 +193,6 @@ TRLC_ENUM_DETAIL(Colors, CustomEnumDefine,
 The output of running all the blocks above will be as follows:
 
 ```console
-trlc@UFO:~/projects/trlc_enum$ ./build/example/example
 Compile time attributes check passed.
 Compile time fromValue(), fromString() check passed.
 Compile time iterators check passed.
@@ -191,6 +219,8 @@ Compile time holder check passed.
 {"tag": "Validate, "value": 2, "name": "END", "desc": ""}
 {"tag": "Validate, "value": 5, "name": "WITH_DEFAULT", "desc": ""}
 {"tag": "Validate, "value": 100, "name": "FULL_FIELD", "desc": "Full feild."}
+SUV :{"tag": "Cars, "value": 2, "name": "SUV", "desc": "A versatile vehicle built for various terrains and passenger capacity."}
+TRUCK :{"tag": "Cars, "value": 3, "name": "TRUCK", "desc": "A powerful vehicle designed for transporting heavy loads and equipment."}
 ```
 
 You can see the full example at [[example](https://github.com/tranglecong/trlc_enum/blob/master/example/example.cpp)]

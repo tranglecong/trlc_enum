@@ -90,4 +90,28 @@ int main()
     {
         std::cout << elem.dump() << std::endl;
     }
+
+    // We can use `Enum::enum_type` just like a regular type.
+    Cars::enum_type a_car{Cars::SUV};
+    auto functor = [](const Cars::enum_type& car) -> void
+    {
+        switch (car)
+        {
+        case Cars::SEDAN:
+            std::cout << "SEDAN :" << car.dump() << std::endl;
+            break;
+        case Cars::SUV:
+            std::cout << "SUV :" << car.dump() << std::endl;
+            break;
+        case Cars::TRUCK:
+            std::cout << "TRUCK :" << car.dump() << std::endl;
+            break;
+        case Cars::JEEP:
+            std::cout << "JEEP :" << car.dump() << std::endl;
+            break;
+        }
+    };
+    functor(a_car);
+    a_car = Cars::TRUCK;
+    functor(a_car);
 }
