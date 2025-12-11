@@ -1,0 +1,190 @@
+---
+# Enable most checks but exclude platform-specific and overly restrictive ones
+Checks: >
+  *,
+  -altera-*,
+  -android-*,
+  -darwin-*,
+  -fuchsia-*,
+  -linuxkernel-*,
+  -llvm-*,
+  -llvmlibc-*,
+  -zircon-*,
+  -google-*,
+  -abseil-*,
+  -openmp-*,
+  -mpi-*,
+  -objc-*,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -modernize-use-trailing-return-type,
+  -hicpp-braces-around-statements,
+  -readability-isolate-declaration,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -hicpp-no-array-decay,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-vararg,
+  -hicpp-vararg,
+  -cert-err58-cpp,
+  -misc-non-private-member-variables-in-classes,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -bugprone-easily-swappable-parameters,
+  -readability-identifier-length
+
+# Treat warnings as errors (strict mode)
+# WarningsAsErrors: '*'
+
+# Check options for specific rules
+CheckOptions:
+  # Naming conventions
+  - key: readability-identifier-naming.ClassCase
+    value: PascalCase
+  - key: readability-identifier-naming.StructCase
+    value: PascalCase
+  - key: readability-identifier-naming.UnionCase
+    value: PascalCase
+  - key: readability-identifier-naming.EnumCase
+    value: PascalCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelCase
+  - key: readability-identifier-naming.MethodCase
+    value: camelCase
+  - key: readability-identifier-naming.VariableCase
+    value: snake_case
+  - key: readability-identifier-naming.ParameterCase
+    value: snake_case
+  - key: readability-identifier-naming.MemberCase
+    value: snake_case
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: '_'
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: '_'
+  # - key: readability-identifier-naming.ConstantCase
+  #   value: UPPER_CASE
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.StaticConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.EnumConstantCase
+    value: snake_case
+  # - key: readability-identifier-naming.GlobalConstantCase
+  #   value: UPPER_CASE
+  - key: readability-identifier-naming.NamespaceCase
+    value: snake_case
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.TypedefCase
+    value: PascalCase
+  - key: readability-identifier-naming.TypeAliasCase
+    value: PascalCase
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: PascalCase
+
+  # Function length limits
+  - key: readability-function-size.LineThreshold
+    value: 150
+  - key: readability-function-size.StatementThreshold
+    value: 150
+  - key: readability-function-size.BranchThreshold
+    value: 15
+  - key: readability-function-size.ParameterThreshold
+    value: 8
+  - key: readability-function-size.NestingThreshold
+    value: 6
+  - key: readability-function-size.VariableThreshold
+    value: 50
+
+  # Cyclomatic complexity
+  - key: readability-function-cognitive-complexity.Threshold
+    value: 25
+
+  # Line length
+  - key: readability-line-length.LineLength
+    value: 100
+
+  # Const correctness
+  - key: readability-const-return-type.IgnoreMacros
+    value: true
+  
+  # Modern C++ features
+  - key: modernize-use-auto.MinTypeNameLength
+    value: 8
+  - key: modernize-use-auto.RemoveStars
+    value: true
+  
+  # Performance
+  - key: performance-unnecessary-value-parameter.AllowedTypes
+    value: 'std::shared_ptr;std::unique_ptr'
+  - key: performance-for-range-copy.WarnOnAllAutoCopies
+    value: true
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: true
+  
+  # Thread safety
+  - key: bugprone-shared-ptr-array-mismatch.CompatibleWithSharedPtr
+    value: true
+  - key: concurrency-mt-unsafe.FunctionSet
+    value: 'any'
+    
+  # Exception safety
+  - key: bugprone-exception-escape.FunctionsThatShouldNotThrow
+    value: 'main;~.*;.*noexcept.*'
+  - key: bugprone-exception-escape.IgnoredExceptions
+    value: 'std::bad_alloc'
+
+  # Memory safety
+  - key: cppcoreguidelines-avoid-goto.IgnoreMacros
+    value: true
+  - key: cppcoreguidelines-macro-usage.AllowedRegexp
+    value: '^(TRLC_|_TRLC_|DEBUG_|NDEBUG|.*_H_?|.*_HPP_?)$'
+  - key: cppcoreguidelines-macro-usage.CheckCapsOnly
+    value: true
+  - key: cppcoreguidelines-macro-usage.IgnoreCommandLineMacros
+    value: true
+  - key: cppcoreguidelines-pro-type-member-init.IgnoreArrays
+    value: true
+  
+  # Header includes
+  - key: misc-include-cleaner.IgnoreHeaders
+    value: '*gtest*,*gmock*,*benchmark*'
+  - key: readability-redundant-preprocessor.TokenKinds
+    value: 'identifier'
+
+  # Misc configuration
+  - key: cert-err33-c.CheckedFunctions
+    value: '::aligned_alloc;::calloc;::malloc;::realloc;::fopen;::freopen;::tmpfile'
+  - key: cert-str34-c.DiagnoseSignedUnsignedCharComparisons
+    value: false
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'assert,TRLC_ASSERT,TRLC_DEBUG_ASSERT'
+  - key: bugprone-suspicious-string-compare.WarnOnImplicitComparison
+    value: true
+  - key: bugprone-suspicious-string-compare.WarnOnLogicalNotComparison
+    value: true
+    
+  # Portability
+  - key: portability-restrict-system-includes.Includes
+    value: '*'
+  - key: portability-restrict-system-includes.AllowedIncludes
+    value: 'algorithm,array,atomic,chrono,condition_variable,coroutine,cstddef,cstdint,cstdlib,exception,functional,future,iostream,memory,mutex,optional,span,string,string_view,system_error,thread,type_traits,unordered_map,unordered_set,utility,variant,vector'
+
+  # CERT specific
+  - key: cert-dcl21-cpp.IgnoreMacros
+    value: true
+  - key: cert-oop57-cpp.MemSetNames
+    value: 'memset,std::memset'
+  - key: cert-oop57-cpp.MemCpyNames  
+    value: 'memcpy,std::memcpy,memmove,std::memmove'
+
+# Header filter for project files only
+HeaderFilterRegex: '(include/trlc/.*|examples/.*|tests)'
+
+# Exclude certain files from checks
+# You can add specific files or patterns here
+FormatStyle: file
+
+# Inheritance configuration for subdirectories  
+InheritParentConfig: false
+
+# System headers to skip
+SystemHeaders: false

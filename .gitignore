@@ -36,4 +36,5 @@
 build/
 .clang-format
 include/trlc/macro/
+compile_commands.json
 

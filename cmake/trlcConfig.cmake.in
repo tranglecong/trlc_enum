@@ -1,9 +1,46 @@
+# TrlcConfig.cmake.in
+# Package configuration file for TRLC library
+
 @PACKAGE_INIT@
 
-# Glob for all target files in the current directory
-file(GLOB TARGET_FILES "${CMAKE_CURRENT_LIST_DIR}/*Targets.cmake")
+# Provide package version information
+set(TRLC_VERSION "@PROJECT_VERSION@")
 
-# Include each target file
-foreach(TARGET_FILE ${TARGET_FILES})
-    include("${TARGET_FILE}")
-endforeach()
+# Include CMake helpers
+include(CMakeFindDependencyMacro)
+
+# TRLC is header-only and has no dependencies
+# If you add dependencies in the future, use find_dependency() here
+# Example: find_dependency(SomeDependency REQUIRED)
+
+# Check if components are requested
+if(Trlc_FIND_COMPONENTS)
+    # Validate requested components
+    set(TRLC_VALID_COMPONENTS enum macro)
+    foreach(component ${Trlc_FIND_COMPONENTS})
+        if(NOT component IN_LIST TRLC_VALID_COMPONENTS)
+            set(Trlc_FOUND FALSE)
+            set(Trlc_NOT_FOUND_MESSAGE "Unsupported component: ${component}. Valid components: ${TRLC_VALID_COMPONENTS}")
+        endif()
+    endforeach()
+endif()
+
+# Import targets
+if(NOT TARGET trlc::enum)
+    include("${CMAKE_CURRENT_LIST_DIR}/TrlcTargets.cmake")
+endif()
+
+# Provide legacy target alias for compatibility
+if(TARGET trlc::enum AND NOT TARGET trlc::trlc)
+    add_library(trlc::trlc ALIAS trlc::enum)
+endif()
+
+# Set found variables
+set(Trlc_FOUND TRUE)
+
+# Report configuration
+if(NOT Trlc_FIND_QUIETLY)
+    message(STATUS "Found TRLC version: ${TRLC_VERSION}")
+endif()
+
+check_required_components(Trlc)

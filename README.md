@@ -4,9 +4,18 @@
 ![Clang](https://github.com/tranglecong/trlc_enum/actions/workflows/Clang.yml/badge.svg)
 ![MSVC](https://github.com/tranglecong/trlc_enum/actions/workflows/MSVC.yml/badge.svg)
 
-A powerful C++ enum library that enhances traditional enums by allowing the use of attributes and providing support for compile-time operations.
+A modern C++17 header-only enum library with **compile-time operations**, rich metadata, STL integration, and customizable policies. All features work at compile-time with full `constexpr` support.
 
-## Features
+- **Full Compile-Time Support** - `constexpr` everything: lookup, iteration, validation
+- **Rich Metadata** - Attach `value`, `desc`, `extra` fields to each enum element
+- **Auto-Increment** - Automatic value filling with customizable increment policies
+- **Powerful Lookup** - `fromValue()` and `fromName()` with `std::optional`
+- **STL Integration** - Works seamlessly with containers, algorithms, and iterators
+- **Custom Policies** - Define your own increment, search, and comparison behaviors
+- **Type-Safe** - Strong typing with comparison operators and switch statement support
+- **Header-Only** - No linking required, just include and use
+
+## Basic Usage
 
 ### Declaration
 
@@ -17,213 +26,243 @@ We can declare enums in a traditional way, with fields or mix.
 ```
 
 ```c++
-TRLC_ENUM(Rainbow,
-          RED,
-          ORANCE,
-          YELLOW,
-          GREEN,
-          BLUE,
-          INDIGO,
-          VIOLET)
+// Basic enum
+TRLC_ENUM(Color, Red, Yellow, Green);
 ```
 
 ```c++
-TRLC_ENUM(Cars,
-          SEDAN = TRLC_FIELD(value = 1, desc = "A comfortable car for daily commuting and family trips."),
-          SUV = TRLC_FIELD(value = 2, desc = "A versatile vehicle built for various terrains and passenger capacity."),
-          TRUCK = TRLC_FIELD(value = 3, desc = "A powerful vehicle designed for transporting heavy loads and equipment."),
-          JEEP = TRLC_FIELD(value = 4, desc = "A rugged vehicle ideal for off-road adventures and exploration."))
+// Enum with rich metadata: value, desc, extra
+TRLC_ENUM(HttpStatus,
+          OK = TRLC_FIELD(value = 200, desc = "Request successful", extra = "2xx"),
+          Created = TRLC_FIELD(value = 201, desc = "Resource created successfully", extra = "2xx"),
+          BadRequest = TRLC_FIELD(value = 400, desc = "Invalid request syntax", extra = "4xx"));
 ```
 
 ```c++
-TRLC_ENUM(Validate,
-          NON_FIELD,
-          WITH_DEFAULT = TRLC_FIELD(value = 5),
-          WITH_DESC = TRLC_FIELD(desc = "With description."),
-          FULL_FIELD = TRLC_FIELD(value = 100, desc = "Full feild."),
-          NEGATIVE_VALUE = TRLC_FIELD(value = -100, desc = "Default trlc enum can support negative value."),
-          END)
+// We can declare enum constants with any combination of fields: value, desc, extra in any order
+TRLC_ENUM(Fields,
+          None,
+          Value = TRLC_FIELD(value = 5),
+          Desc = TRLC_FIELD(desc = "With Description"),
+          Extra = TRLC_FIELD(extra = "Extra Info"),
+          All = TRLC_FIELD(value = 10, desc = "All Fields", extra = "Full"));
+```
+
+```c++
+// Enum with custom types: std::string_view for value, desc, extra
+constexpr bool case_sensitive{false};
+using FilePolicies = trlc::enums::policies::
+    DefaultPolicies<std::string_view, std::string_view, std::string_view, case_sensitive>;
+TRLC_ENUM_DEF(FileType,
+              FilePolicies,
+              Json = TRLC_FIELD(value = ".json", desc = "JSON file", extra = "application/json"),
+              Xml = TRLC_FIELD(value = ".xml", desc = "XML file", extra = "application/xml"),
+              Yaml = TRLC_FIELD(value = ".yaml", desc = "YAML file", extra = "application/x-yaml"))
 ```
 
 > This Enum is essentially a struct, so we can declare it within the scope where the struct can be declared.
 
 ### Attributes
 
-We can use the attributes `name`, `value`, `desc` and `tag` of trlc enum
-
 ```c++
-static_assert(Rainbow::ORANCE.tag() == "Rainbow");
-static_assert(Rainbow::RED.value() == 0);
-static_assert(Rainbow::GREEN.name() == "GREEN");
-static_assert(Cars::JEEP.value() == 4);
-static_assert(Cars::SUV.name() == "SUV");
-static_assert(Cars::SEDAN.desc() == "A comfortable car for daily commuting and family trips.");
-static_assert(Validate::NEGATIVE_VALUE.name() == "NEGATIVE_VALUE");
-static_assert(Validate::NEGATIVE_VALUE.value() == -100);
-static_assert(Validate::NEGATIVE_VALUE.desc() == "Default trlc enum can support negative value.");
+// We can use attributes like name(), value(), desc(), extra(), enumName() on enum instances
+static_assert(HttpStatus::OK.value() == 200);
+static_assert(HttpStatus::Created.desc() == "Resource created successfully");
+static_assert(HttpStatus::BadRequest.extra() == "4xx");
+static_assert(HttpStatus::OK.enumName() == "HttpStatus");
+
+constexpr auto green{Color::Green};
+static_assert(green.name() == "Green");
+static_assert(green.value() == 2);
+static_assert(green.enumName() == "Color");
 
 std::cout << "Compile time attributes check passed." << std::endl;
 ```
 
 ### Conversion
 
-We can use the fromValue and fromString functions to look up enum elements.
-
 ```c++
-constexpr auto rainbow_green_optional{Rainbow::fromValue(3)};
-static_assert(rainbow_green_optional.has_value() == true);
-static_assert(rainbow_green_optional.value() == Rainbow::GREEN);
+// We can use the functions fromValue and fromString to lookup the enum element.
+// The return value will be constexpr std::optional<enum>
+constexpr auto status_opt{HttpStatus::fromValue(201)};
+static_assert(status_opt.has_value());
+static_assert(status_opt.value() == HttpStatus::Created);
 
-constexpr auto cars_suv_optional{Cars::fromString("SUV")};
-static_assert(cars_suv_optional.has_value() == true);
-static_assert(cars_suv_optional.value() == Cars::SUV);
+// Look up with case-insensitive
+constexpr auto filetype_opt{FileType::fromName("XML")};
+static_assert(filetype_opt.has_value());
+static_assert(filetype_opt.value() == FileType::Xml);
 
 std::cout << "Compile time fromValue(), fromString() check passed." << std::endl;
 ```
 
-> The return value will be constexpr `std::optional<enumtype>`.
+### Comparison
+
+```c++
+// We can use comparison operators
+constexpr auto yellow{Color::Yellow};
+static_assert(yellow != Color::Green);
+static_assert(yellow > Color::Red);
+static_assert(yellow < Color::Green);
+static_assert(yellow == Color::Yellow);
+
+std::cout << "Compile time comparison operators check passed." << std::endl;
+```
 
 ### Iterators
 
-We can also use iterators for enum classes. And it also supports compile-time!
-
 ```c++
-constexpr auto check_size_of_rainbow = [&]() -> size_t
-{
-    auto size{0};
-    for (auto elem : Rainbow::iterator)
-    {
-        size++;
+// Range-based for loop
+constexpr std::size_t num_colors = [] {
+    std::size_t count = 0;
+    for ([[maybe_unused]] const auto& light : Color::all()) {
+        ++count;
     }
-    return size;
-};
-static_assert(check_size_of_rainbow() == Rainbow::size());
+    return count;
+}();
+static_assert(num_colors == Color::SIZE);
 
-std::cout << "Compile time iterators check passed." << std::endl;
+std::cout << "Compile time range-based for loop check passed." << std::endl;
 ```
 
-### Traceability
-
-From an enum element, we can also retrieve its holder.
-
 ```c++
-constexpr auto suv{cars_suv_optional.value()};
-static_assert(suv.tag() == "Cars");
-static_assert(suv.holder().tag() == "Cars");
-static_assert(suv.holder().TRUCK == Cars::TRUCK);
-
-std::cout << "Compile time holder check passed." << std::endl;
-```
-
-> The tag property of the enum or enum element is the name of that enum.
-
-### Information
-
-Each enum or enum element has a dump() function that operates at runtime.
-
-```c++
-std::cout << "[1] Enum Rainbow :";
-std::cout << Rainbow::dump() << std::endl;
-
-std::cout << "[2] Enum Cars :";
-std::cout << Cars::dump() << std::endl;
-
-std::cout << "[3] Enum Validate :\n";
-// Of course, we can also use iterators to print the properties.
-for (auto elem : Validate::iterator)
-{
-    std::cout << elem.dump() << std::endl;
+// Explicit iterators
+std::cout << HttpStatus::NAME << " :\n";
+for (auto it = HttpStatus::begin(); it != HttpStatus::end(); ++it) {
+    std::cout << " - " << it->name() << " = " << it->value() << " (" << it->desc() << ", "
+                << it->extra() << ")\n";
 }
 ```
 
-> It returns a JSON string of the properties associated with the enum element and a list of elements for the enum.
-
-### Regular type
-
-We can use `Enum::enum_type` just like a regular type.
+### STL Compatibility
 
 ```c++
-Cars::enum_type a_car{Cars::SUV};
-auto functor = [](const Cars::enum_type& car) -> void
-{
-    switch (car)
-    {
-    case Cars::SEDAN:
-        std::cout << "SEDAN :" << car.dump() << std::endl;
-        break;
-    case Cars::SUV:
-        std::cout << "SUV :" << car.dump() << std::endl;
-        break;
-    case Cars::TRUCK:
-        std::cout << "TRUCK :" << car.dump() << std::endl;
-        break;
-    case Cars::JEEP:
-        std::cout << "JEEP :" << car.dump() << std::endl;
-        break;
-    }
-};
-functor(a_car);
-a_car = Cars::TRUCK;
-functor(a_car);
+// STL containers compatibility
+auto found =
+    std::find_if(Fields::begin(), Fields::end(), [](auto f) { return f == Fields::All; });
+
+assert(found != Fields::end());
+assert(*found == Fields::All);
+
+std::vector<Color::Enum> lights{};
+lights.push_back(Color::Green);
+lights.push_back(Color::Red);
+lights.push_back(Color::Yellow);
+lights.push_back(Color::Green);
+
+std::cout << "Light Sequence: ";
+for (const auto& light : lights) {
+    std::cout << light.name() << " ";
+}
 ```
-
-### Customization
-
-Currently, `TRLC_ENUM` uses `trlc:DefaultEnumDef<>`, but you can also define an enum definition and use it with `TRLC_ENUM_DETAIL`.
-
-```c++
-template<class Holder>
-struct CustomEnumDefine
-{
-    using holder = Holder;
-    using value_type = uint32_t;
-    using value_search_policy = trlc::policy::BinarySearchPolicy;
-    using name_search_policy = trlc::policy::CaseInsensitiveStringSearchPolicy;
-    using unknown_policy = trlc::policy::UnknownPolicy;
-    using enum_type = trlc::Enum<value_type, holder>;
-    using iterator = trlc::EnumIterator<holder>;
-};
-
-TRLC_ENUM_DETAIL(Colors, CustomEnumDefine,
-    RED,
-    BLUE,
-    GREEN)
-```
-
-The output of running all the blocks above will be as follows:
-
-```console
+**Terminal Output:**
+```shell
 Compile time attributes check passed.
 Compile time fromValue(), fromString() check passed.
-Compile time iterators check passed.
-Compile time holder check passed.
-[1] Enum Rainbow :[
- {"tag": "Rainbow, "value": 0, "name": "RED", "desc": ""},
- {"tag": "Rainbow, "value": 1, "name": "ORANCE", "desc": ""},
- {"tag": "Rainbow, "value": 2, "name": "YELLOW", "desc": ""},
- {"tag": "Rainbow, "value": 3, "name": "GREEN", "desc": ""},
- {"tag": "Rainbow, "value": 4, "name": "BLUE", "desc": ""},
- {"tag": "Rainbow, "value": 5, "name": "INDIGO", "desc": ""},
- {"tag": "Rainbow, "value": 6, "name": "VIOLET", "desc": ""},
-]
-[2] Enum Cars :[
- {"tag": "Cars, "value": 1, "name": "SEDAN", "desc": "A comfortable car for daily commuting and family trips."},
- {"tag": "Cars, "value": 2, "name": "SUV", "desc": "A versatile vehicle built for various terrains and passenger capacity."},
- {"tag": "Cars, "value": 3, "name": "TRUCK", "desc": "A powerful vehicle designed for transporting heavy loads and equipment."},
- {"tag": "Cars, "value": 4, "name": "JEEP", "desc": "A rugged vehicle ideal for off-road adventures and exploration."},
-]
-[3] Enum Validate :
-{"tag": "Validate, "value": -100, "name": "NEGATIVE_VALUE", "desc": "Default trlc enum can support negative value."}
-{"tag": "Validate, "value": 0, "name": "NON_FIELD", "desc": ""}
-{"tag": "Validate, "value": 1, "name": "WITH_DESC", "desc": "With description."}
-{"tag": "Validate, "value": 2, "name": "END", "desc": ""}
-{"tag": "Validate, "value": 5, "name": "WITH_DEFAULT", "desc": ""}
-{"tag": "Validate, "value": 100, "name": "FULL_FIELD", "desc": "Full feild."}
-SUV :{"tag": "Cars, "value": 2, "name": "SUV", "desc": "A versatile vehicle built for various terrains and passenger capacity."}
-TRUCK :{"tag": "Cars, "value": 3, "name": "TRUCK", "desc": "A powerful vehicle designed for transporting heavy loads and equipment."}
+Compile time comparison operators check passed.
+Compile time range-based for loop check passed.
+HttpStatus :
+ - OK = 200 (Request successful, 2xx)
+ - Created = 201 (Resource created successfully, 2xx)
+ - BadRequest = 400 (Invalid request syntax, 4xx)
+Light Sequence: Green Red Yellow Green
 ```
 
-You can see the full example at [[example](https://github.com/tranglecong/trlc_enum/blob/master/example/example.cpp)]
+> **You can see the full basic usage example at [[basic_usage](https://github.com/tranglecong/trlc_enum/blob/master/examples/basic_usage.cpp)]**
+
+## Customization
+### Custom Extra Metadata
+```c++
+// Use case: Store custom struct type as extra metadata (e.g., RGB color values)
+// Features: Compile-time custom types, type-safe metadata, constexpr validation
+struct RGB {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
+```
+
+```c++
+// Custom extra field type with default policies
+// NOTE: extra = (RGB{255, 0, 0}) syntax requires parentheses to avoid parsing issues
+constexpr bool case_sensitive{false};
+using ColorPolicies = trlc::enums::policies::DefaultPolicies<int, std::string_view, RGB, case_sensitive>;
+TRLC_ENUM_DEF(Color,
+              ColorPolicies,
+              Red = TRLC_FIELD(extra = (RGB{255, 0, 0})),
+              Green = TRLC_FIELD(extra = (RGB{0, 255, 0})),
+              Blue = TRLC_FIELD(extra = (RGB{0, 0, 255})));
+```
+
+```c++
+// Extra Metadata can work as normal struct
+static_assert(Color::Red.extra().r == 255);
+static_assert(Color::Red.extra().g == 0);
+static_assert(Color::Red.extra().b == 0);
+
+static_assert(Color::Green.extra().r == 0);
+static_assert(Color::Green.extra().g == 255);
+static_assert(Color::Green.extra().b == 0);
+
+static_assert(Color::Blue.extra().r == 0);
+static_assert(Color::Blue.extra().g == 0);
+static_assert(Color::Blue.extra().b == 255);
+
+std::cout << "Custom extra metadata RGB values verified at compile time." << std::endl;
+
+// Iterate over all Color enum values and print their names and RGB extras
+for (const auto& p : Color::all()) {
+    std::cout << p.name() << ": (" << static_cast<int>(p.extra().r) << ", "
+                << static_cast<int>(p.extra().g) << ", " << static_cast<int>(p.extra().b)
+                << ")\n";
+}
+```
+
+**Terminal Output**
+```shell
+Custom extra metadata RGB values verified at compile time.
+Red: (255, 0, 0)
+Green: (0, 255, 0)
+Blue: (0, 0, 255)
+```
+
+> **You can see the full custom extra example at [[custom_extra](https://github.com/tranglecong/trlc_enum/blob/master/examples/custom_extra.cpp)]**
+
+### Custom Policies
+
+```c++
+// Use case: Bit flags for permissions, options, etc.
+// Features: Auto-increment as powers of 2 (1, 2, 4, 8, ...)
+
+template <typename T>
+struct PowerOf2Increment {
+    static constexpr T startValue() { return 0x01; }
+
+    static constexpr T increment(T current, std::size_t /* index */) { return current * 2; }
+};
+
+template <typename T>
+struct PowerOf2Policies {
+    using ValueType = T;
+    using DescType = std::string_view;
+    using ExtraType = std::string_view;
+    inline static constexpr bool CASE_SENSITIVE{true};
+
+    using Increment = PowerOf2Increment<ValueType>;
+    using Search = LinearSearchPolicy<ValueType, CASE_SENSITIVE>;
+    using Comparison = LexicographicComparisonPolicy<ValueType, CASE_SENSITIVE>;
+};
+
+TRLC_ENUM_DEF(Permission,
+              PowerOf2Policies<uint32_t>,
+              Read,     // 0x01 (auto)
+              Write,    // 0x02 (auto)
+              Execute,  // 0x04 (auto)
+              Delete    // 0x08 (auto)
+);
+```
+
+> **You can see the full basic usage example at [[basic_usage](https://github.com/tranglecong/trlc_enum/blob/master/examples/custom_policies.cpp)]**
 
 ## Installation
 
