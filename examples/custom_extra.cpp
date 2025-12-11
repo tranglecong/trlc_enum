@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdint>
 
 #include "trlc/enum.hpp"
 
